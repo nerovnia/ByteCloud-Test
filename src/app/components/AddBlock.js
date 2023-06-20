@@ -1,8 +1,12 @@
 import Appointments from "./input/Appointments";
 import Doctors from "./input/Doctors";
 import Patients from "./input/Patients";
+import {useState} from "react";
 
 export default function AddBlock() {
+  const {fullData, setFullData} = useState({});
+
+
   return (
     <>
       <div class="container text-center">

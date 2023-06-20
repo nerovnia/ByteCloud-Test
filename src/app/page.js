@@ -56,7 +56,7 @@ export default function Home() {
           </div>
 
           <div className="fixed-bottom bg-dark-subtle  pt-4 pb-4">
-            Test task for ByteCloud 2023 by Volodymyr Nerovnia
+            Medicine Application &copy; 2023 by Volodymyr Nerovnia
           </div>
         </main>
       </div>
