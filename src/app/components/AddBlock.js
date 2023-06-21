@@ -1,32 +1,64 @@
 import Appointments from "./input/Appointments";
 import Doctors from "./input/Doctors";
 import Patients from "./input/Patients";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 
 export default function AddBlock() {
-  const {fullData, setFullData} = useState({});
+  const [fullData, setFullData] = useState({});
 
+  // ----------------------------- Delete in production
+  useEffect(() => {
+    console.log(fullData);
+  }, [fullData]);
+  // -----------------------------
+  
+  function handleChangePatients(event) {
+    const {doctors, appointments} = fullData;
+    setFullData({
+      doctors: doctors,
+      appointments: appointments,
+      patients: event.target.value
+    });
+  }
+
+  function handleChangeDoctors(event) {
+    const {patients, appointments} = fullData;
+    setFullData({
+      doctors: event.target.value,
+      appointments: appointments,
+      patients: patients
+    });
+  }
+
+  function handleChangeAppointments(event) {
+    const {patients, doctors} = fullData;
+    setFullData({
+      doctors: doctors,
+      appointments: event.target.value,
+      patients: patients
+    });
+  }
 
   return (
     <>
-      <div class="container text-center">
-        <div class="row">
-          <div class="col">
-            <Patients></Patients>
+      <div className="container text-center">
+        <div className="row">
+          <div className="col">
+            <Patients onPatients={handleChangePatients}></Patients>
           </div>
-          <div class="col">
-            <Doctors></Doctors>
+          <div className="col">
+            <Doctors onDoctors={handleChangeDoctors}></Doctors>
           </div>
-          <div class="col">
-            <Appointments></Appointments>
+          <div className="col">
+            <Appointments onAppointments={handleChangeAppointments}></Appointments>
           </div>
         </div>
       </div>
-      <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-2 mb-2">
-        <button class="btn btn-primary me-md-2" type="button">
+      <div className="d-grid gap-2 d-md-flex justify-content-md-end mt-2 mb-2">
+        <button className="btn btn-primary me-md-2" type="button">
           Send Data
         </button>
-        <button class="btn btn-primary" type="button">
+        <button className="btn btn-primary" type="button">
           Clear DB
         </button>
       </div>
