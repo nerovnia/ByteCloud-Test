@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <BrowserRouter>
       <div className="bg-body-tertiary h-100">
-        <nav class="navbar navbar-expand-lg bg-body-secondary">
+        <nav className="navbar navbar-expand-lg bg-body-secondary">
           <div className="container-fluid">
             <a className="navbar-brand" href="/">
               Medicine Application
