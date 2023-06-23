@@ -1,100 +1,58 @@
 export function validateRegisterRecords(records) {
-  console.log(records.patients);
   if (!records) {
     return {};
   }
 
   return {
-    appointments: (isString(records?.appointments)) ? validateAppointments(records.appointments) : {},
-    doctors: (isString(records?.doctors)) ? validateDoctors(records.doctors) : {},
-    patients: (isString(records?.patients)) ? validatePatients(records.patients) : {},
+    appointments: (isString(records?.appointments)) ? validateRecords(records.appointments, validateAppointment) : {},
+    doctors: (isString(records?.doctors)) ? validateRecords(records.doctors, validatePerson) : {},
+    patients: (isString(records?.patients)) ? validateRecords(records.patients, validatePerson) : {},
   }
 }
-/*
-function validateDoctors(doctors) {
+
+function validateRecords(records, validateFunction) {
   const result = {
     successful: [],
     wrongFormat: [],
     duplicates: []
   };
-
-  doctors.split("\n").forEach(doctor => {
-    switch(validateDoctor(doctor)) {
+  records.split("\n").forEach(origRecord => {
+    let record = origRecord.trim().replaceAll(/\s+/g, " ");
+    switch(validateFunction(result.successful.slice(), record)) {
       case "success":
-        result.success.push(doctor);
+        result.successful.push(record);
         break;
       case "wrong":
-        result.wrong.push(doctor);
+        result.wrongFormat.push(record);
         break;
       case "duplicate":
-        result.duplicate.push(doctor);
-        break;
-        }
-  });
-  return result;
-}
-
-function validateAppointments(appointments) {
-  return {
-    successful: appointments,
-    wrongFormat: "",
-    duplicates: ""
-  };
-}
-*/
-function validatePatients(patients) {
-  const result = {
-    successful: [],
-    wrongFormat: [],
-    duplicates: []
-  };
-  patients.split("\n").forEach(patient => {
-    switch(validatePatient(result.successful.slice(), patient)) {
-      case "success":
-        result.successful.push(patient);
-        break;
-      case "wrong":
-        result.wrongFormat.push(patient);
-        break;
-      case "duplicate":
-        result.duplicate.push(patient);
+        result.duplicates.push(record);
         break;
         }
   });
   console.dir(result);
   return result;
 }
-/*
-function validateDoctor(doctor) {
-  console.log(doctor);
-  return true;
-}
 
-function validateAppointment(appointment) {
-  console.log('validateAppointment');
-  return true;
-}
-*/
-
-
-
-function validatePatient(successPatients, patient) {
-  console.log('validatePatient');
-  //const patientDataArr = transformToPatientObj(patient.split(',').map(p => p.trim()));
-  const patientDataArr = patient.split(',').map(p => p.trim());
-  if ((patientDataArr.length < 2) || (patientDataArr.length > 4)) {
+function validatePerson(successPersons, person) {
+  console.log('validatePerson');
+  const personDataArr = person.split(',').map(p => p.trim());
+  if ((personDataArr.length < 2) || (personDataArr.length > 4)) {
     return "wrong";
   }
 
-  if (successPatients.filter(p => p === patient).length > 0) {
+  if (successPersons.filter(p => p === person.trim()).length > 0) {
     return "duplicate";
   }
 
-  if((Number.parseInt(patientDataArr[0]) > 0) && (isRightAppHoursString(patientDataArr[1]))) {
-    if ((patientDataArr.length > 2) && (!isRightPersonName(patientDataArr[2]))) {
+  if((Number.parseInt(personDataArr[0]) > 0) && (isRightAppHoursString(personDataArr[1]))) {
+    if ((personDataArr.length > 2) && (!isRightPersonName(personDataArr[2]))) {
+      if ((personDataArr.length === 3) && (isRightDateString(personDataArr[2]))) {
+        return "success";
+      }
       return "wrong";
     }
-    if ((patientDataArr.length > 3) && (!isRightDateString(patientDataArr[3]))) {
+    if ((personDataArr.length > 3) && (!isRightDateString(personDataArr[3]))) {
       return "wrong";
     }
     return "success";
@@ -102,6 +60,29 @@ function validatePatient(successPatients, patient) {
   return "wrong";
 }
 
+
+function validateAppointment(successAppointments, appointment) {
+  console.log('validateAppointment');
+  const appointmentDataArr = appointment.split(',').map(p => p.trim());
+  if ((appointmentDataArr.length < 2) || (appointmentDataArr.length > 3)) {
+    return "wrong";
+  }
+
+  if (successAppointments.filter(p => p === appointment.trim()).length > 0) {
+    return "duplicate";
+  }
+
+  if((Number.parseInt(appointmentDataArr[0]) > 0) && (Number.parseInt(appointmentDataArr[1]) > 0)) {
+    if (appointmentDataArr.length === 2) {
+      return "success";
+    }
+    if ((appointmentDataArr.length === 3) && ((Number.parseInt(appointmentDataArr[2]) > 0) && ((!Number.parseInt(appointmentDataArr[2]) < 24)))) {
+        return "success";
+    }
+    return "wrong";
+  }
+  return "wrong";
+}
 
 function isRightPersonName(str) {
   return /^\s*([A-Za-z])+\s*([A-Za-z])*\s*$/.test(str);
@@ -172,7 +153,8 @@ Patients
 101, 10-12, James Davis, 31.12.1999
 102, 11-12, Mary
 103, 8-12
-103, 8-12 
+103, 8-12
+103, 8-12
 102, 11-12, Mary FGH gh
 101, 0-12, James Davis, 31.12.1999
 101, 13-2, James Davis, 31.12.1999
@@ -187,6 +169,7 @@ Doctors
 201, 10-13
 202, 10-15, Robert
 203, 16-18, 01.01.1980
+203, 16-18, 01.01.1980, 01.01.1980
 
 
 Appointments
@@ -194,5 +177,35 @@ Appointments
 101, 202, 14
 102, 201, 11
 102, 202, 11
+102, 202
+
+102, 201, 11
+102, 201, 11, 10
+104,
+105,,1
+
+
+
+
+
+
+
+101,   201, 10
+101, 202,    14
+102,   201, 11
+102, 202, 11
+102,   202
+
+102, 201, 11
+102, 201,   11, 10
+104,
+105,   ,1
+
+
+
+
+
+
+
 
 */
