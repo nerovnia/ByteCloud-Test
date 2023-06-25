@@ -4,14 +4,15 @@ export function validateRegisterRecords(records) {
   }
 
   return {
-    appointments: (isString(records?.appointments)) ? validateRecords(records.appointments, validateAppointment) : {},
-    doctors: (isString(records?.doctors)) ? validateRecords(records.doctors, validatePerson) : {},
-    patients: (isString(records?.patients)) ? validateRecords(records.patients, validatePerson) : {},
+    appointments: (isString(records?.appointments)) ? validateRecords("appointment", records.appointments, validateAppointment, parseToAppointment) : {},
+    doctors: (isString(records?.doctors)) ? validateRecords("doctor", records.doctors, validatePerson, parseToPerson) : {},
+    patients: (isString(records?.patients)) ? validateRecords("patient", records.patients, validatePerson, parseToPerson) : {},
   }
 }
 
-function validateRecords(records, validateFunction) {
+function validateRecords(type, records, validateFunction, transformToObject) {
   const result = {
+    type: type,
     successful: [],
     wrongFormat: [],
     duplicates: []
@@ -20,7 +21,7 @@ function validateRecords(records, validateFunction) {
     let record = origRecord.trim().replaceAll(/\s+/g, " ");
     switch(validateFunction(result.successful.slice(), record)) {
       case "success":
-        result.successful.push(record);
+        result.successful.push(transformToObject(record));
         break;
       case "wrong":
         result.wrongFormat.push(record);
@@ -41,7 +42,12 @@ function validatePerson(successPersons, person) {
     return "wrong";
   }
 
-  if (successPersons.filter(p => p === person.trim()).length > 0) {
+  //if (successPersons.filter(p => p === person.trim()).length > 0) {
+  if (successPersons.filter(p => {
+    console.dir(p);
+    console.log(`${p} === ${person.trim()}`);
+    return p === person.trim();
+  }).length > 0) {
     return "duplicate";
   }
 
@@ -83,6 +89,36 @@ function validateAppointment(successAppointments, appointment) {
   }
   return "wrong";
 }
+
+function parseToPerson(personStr) {
+  const result = {};
+  const arrStrFields = personStr.split(',').map(personStrField => personStrField.trim());
+  result.id = Number.parseInt(arrStrFields[0]);
+  result.hours = {};
+  const arrHours = arrStrFields[1].split('-').map(hourStr => Number.parseInt(hourStr));
+  result.hours.start = arrHours[0];
+  result.hours.end = arrHours[1];
+  if(arrStrFields.length > 2) {
+    if (isRightPersonName(arrStrFields[2])) {
+      result.personName = arrStrFields[2];
+    } else {
+      result.birthDate = arrStrFields[2];
+    }
+  }
+  return result;
+}
+
+function parseToAppointment(appointmentStr) {
+  const result = {};
+  const arrStrFields = appointmentStr.split(',').map(personStrField => personStrField.trim());
+  result.patient = Number.parseInt(arrStrFields[0]);
+  result.doctor = Number.parseInt(arrStrFields[1]);
+  if (arrStrFields.length > 2) {
+    result.hour = Number.parseInt(arrStrFields[2]);
+  }
+  return result;
+}
+
 
 function isRightPersonName(str) {
   return /^\s*([A-Za-z])+\s*([A-Za-z])*\s*$/.test(str);
