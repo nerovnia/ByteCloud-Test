@@ -1,4 +1,4 @@
-export function validateRegisterRecords(records) {
+export default function validateRegisterRecords(records) {
   if (!records) {
     return {};
   }
