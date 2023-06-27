@@ -27,6 +27,12 @@ body {
     rgb(var(--background-start-rgb));
 }
 */
+
+.mcontainer { 
+  margin-bottom: 90px;
+}
+
 textarea {
   resize: none;
 }
+
