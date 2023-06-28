@@ -1,4 +1,4 @@
-export default function validateRegisterRecords(records) {
+export function validateRegisterRecords(records) {
   if (!records) {
     return {};
   }
@@ -21,32 +21,30 @@ function validateRecords(type, records, validateFunction, transformToObject) {
     let record = origRecord.trim().replaceAll(/\s+/g, " ");
     switch(validateFunction(result.successful.slice(), record)) {
       case "success":
-        result.successful.push(transformToObject(record));
+        result.successful.push({
+          obj: transformToObject(record),
+          str: record
+        });
         break;
       case "wrong":
-        result.wrongFormat.push(record);
+        result.wrongFormat.push({str: record});
         break;
       case "duplicate":
-        result.duplicates.push(record);
+        result.duplicates.push({str: record});
         break;
         }
   });
-  console.dir(result);
   return result;
 }
 
 function validatePerson(successPersons, person) {
-  console.log('validatePerson');
   const personDataArr = person.split(',').map(p => p.trim());
   if ((personDataArr.length < 2) || (personDataArr.length > 4)) {
     return "wrong";
   }
 
-  //if (successPersons.filter(p => p === person.trim()).length > 0) {
   if (successPersons.filter(p => {
-    console.dir(p);
-    console.log(`${p} === ${person.trim()}`);
-    return p === person.trim();
+    return p.str === person.trim();
   }).length > 0) {
     return "duplicate";
   }
@@ -68,7 +66,6 @@ function validatePerson(successPersons, person) {
 
 
 function validateAppointment(successAppointments, appointment) {
-  console.log('validateAppointment');
   const appointmentDataArr = appointment.split(',').map(p => p.trim());
   if ((appointmentDataArr.length < 2) || (appointmentDataArr.length > 3)) {
     return "wrong";
@@ -104,6 +101,9 @@ function parseToPerson(personStr) {
     } else {
       result.birthDate = arrStrFields[2];
     }
+  }
+  if(arrStrFields.length === 4 ) {
+    result.birthDate = arrStrFields[3];
   }
   return result;
 }
@@ -141,44 +141,6 @@ function isString(str) { return (typeof str === 'string') }
 
 function isEmptyString(str) { return (str.trim() === '') }
 
-
-/*
-function transformToPatientObj(patientFieldsArr) {
-  if((patientFieldsArr.length < 2) || (patientFieldsArr.length > 4)){
-    return {};
-  }
-  if ((isID(patientFieldsArr[0])) && (isTime(patientFieldsArr[1])) && (isName(patientFieldsArr[2])) && (isBirthDate(patientFieldsArr[3]))) {
-
-  }
-}
-*/
-
-/*
-function parseAppHours(str) {
-  const hours = (/^\s*([0-9]|0[0-9]|1[0-9]|2[0-2])-([0-9]|0[0-9]|1[0-9]|2[0-3])\s*$/.exec(str));
-  if((hours) && (Number.parseInt(hours[1]) < Number.parseInt(hours[2]))) {
-    return {
-      startHour: Number.parseInt(hours[1]),
-      endHour: Number.parseInt(hours[2])
-    }
-  }
-  return {
-    startHour: -1,
-    endHour: -1
-  };
-}
-*/
-
-
-/*
-function formatDateString(str) {
-  const dateStrArr = /^\s*(3[01]|[12][0-9]|0?[1-9])\.(1[012]|0?[1-9])\.((?:19|20)\d{2})\s*$/.exec(str)
-  if(dateStrArr) {
-    return `${dateStrArr[1]}.${dateStrArr[2]}.${dateStrArr[3]}`;
-  }
-return "";
-}
-*/
 /* 
 Patients
 101, 10-12, James Davis, 31.12.1999
@@ -241,7 +203,13 @@ Appointments
 
 
 
-
+101, 10-12, James Davis, 31.12.1999
+102, 11-12, Mary
+103, 8-12
+102, 11-12, Mary
+101, 10-12, James Davis, 31.12.1999
+105, 13-12, Mary
+107, 8-12, 32.12.1999
 
 
 */

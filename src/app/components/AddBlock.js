@@ -3,13 +3,15 @@ import Doctors from "./input/Doctors";
 import Patients from "./input/Patients";
 import {useState, useEffect} from "react";
 import { validateRegisterRecords } from "../service/validators";
+import SaveModal from "./report/SaveModal";
 
 export default function AddBlock() {
   const [registrationData, setRegistrationData] = useState({});
+  const [registrationDataForModal, setRegistrationDataForModal] = useState({});
+  const [saveModalShow, setSaveModalShow] = useState(false);
 
   // ----------------------------- Delete in production
   useEffect(() => {
-    console.log(registrationData);
   }, [registrationData]);
   // -----------------------------
 
@@ -41,42 +43,47 @@ export default function AddBlock() {
   }
 
   function handleSendData() {
-    //if(registrationData?.appointments)
-    console.dir(validateRegisterRecords(registrationData));
-    setRegistrationData({});
+    setRegistrationDataForModal(registrationData);
+    setSaveModalShow(true);
     document.querySelector("#frmAddRegistrationData").reset();
-    //console.log("SendData");
+    setRegistrationData({});
   }
 
   function handleClearDB() {
     console.log("Clear DB");
   }
 
+  function saveModalClose() {
+    setSaveModalShow(false);
+    setRegistrationDataForModal({});
+  }
+
   return (
     <>
-      <form id="frmAddRegistrationData">
+      <form id="frmAddRegistrationData" className="mb-auto">
         <div className="container text-center">
           <div className="row">
             <div className="col">
-              <Patients onPatients={handleChangePatients}></Patients>
+              <Patients dataTest="patients" onPatients={handleChangePatients}></Patients>
             </div>
             <div className="col">
-              <Doctors onDoctors={handleChangeDoctors}></Doctors>
+              <Doctors dataTest="doctors" onDoctors={handleChangeDoctors}></Doctors>
             </div>
             <div className="col">
-              <Appointments onAppointments={handleChangeAppointments}></Appointments>
+              <Appointments dataTest="appointments" onAppointments={handleChangeAppointments}></Appointments>
             </div>
           </div>
         </div>
         <div className="d-grid gap-2 d-md-flex justify-content-md-end mt-2 mb-2">
-          <button className="btn btn-primary me-md-2" type="button" onClick={handleSendData}>
+          <button id="sendData" className="btn btn-primary me-md-2" type="button" onClick={handleSendData}>
             Send Data
           </button>
-          <button className="btn btn-primary" type="button" onClick={handleClearDB}>
+          <button id="clearDB" className="btn btn-primary" type="button" onClick={handleClearDB}>
             Clear DB
           </button>
         </div>
       </form>
+      <SaveModal show={saveModalShow} reportdata={validateRegisterRecords(registrationDataForModal)} onHide={() => saveModalClose()} />
     </>
   );
 }
