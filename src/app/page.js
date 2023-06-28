@@ -47,8 +47,8 @@ export default function Home() {
           </div>
         </nav>
 
-        <main className="container-xl text-center mt-4 mb-4">
-          <div className="">
+        <main className="container-xl text-center mt-4 mcontainer">
+          <div className="mb-5">
             <Routes>
               <Route path="/" element={<AddBlock />}></Route>
               <Route path="/appointments" element={<ManagementBlock />}></Route>
