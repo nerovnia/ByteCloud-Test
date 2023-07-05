@@ -5,6 +5,9 @@ import {useState, useEffect} from "react";
 import { validateRegisterRecords } from "../service/validators";
 import SaveModal from "./report/SaveModal";
 
+import { InferGetServerSidePropsType, GetServerSideProps } from 'next';
+//import { addCollection } from "@/utils/dbOperations";
+
 export default function AddBlock() {
   const [registrationData, setRegistrationData] = useState({});
   const [registrationDataForModal, setRegistrationDataForModal] = useState({});
@@ -43,6 +46,8 @@ export default function AddBlock() {
   }
 
   function handleSendData() {
+    //dbOperations.addCollection();
+    console.log(registrationData);
     setRegistrationDataForModal(registrationData);
     setSaveModalShow(true);
     document.querySelector("#frmAddRegistrationData").reset();
