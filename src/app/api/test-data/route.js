@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import { promises as fs } from 'fs';
 import path from 'path';
 
+const TEST_DATA_DIR = process.env.TEST_DATA_DIR;
+
+
 // Define the path to the test data file
-const testDataDirectory = path.join(process.cwd(), 'test/data', 'right-data.json');
+const testDataDirectory = path.join(process.cwd(), TEST_DATA_DIR, 'right-data.json');
+//const testDataDirectory = path.join(process.cwd(), 'test/data', 'right-data.json');
 const maxTestPatients = 20;
 const maxTestDoctors = 5;
 
@@ -47,6 +51,7 @@ function getRandomPersonArray(persons, max) {
  * @returns {Object} - NextResponse object with the response data
  */
 export async function GET(req, res) {
+
   try {
     // Read the test data from the file
     const patientsAndDoctors = JSON.parse(await fs.readFile(testDataDirectory, 'utf8'));
@@ -54,8 +59,18 @@ export async function GET(req, res) {
     // Get random patients and doctors
     const result = {
       patients: getRandomPersonArray(patientsAndDoctors.patients, maxTestPatients),
-      doctors: getRandomPersonArray(patientsAndDoctors.doctors, maxTestDoctors)
+      doctors: getRandomPersonArray(patientsAndDoctors.doctors, maxTestDoctors),
     };
+
+
+    const maxAmountAppointments = 40;
+    const maxAmountPatientAttempt = 3;
+    const doctorsIdSet = new Set(result.doctors.map(doctor => doctor.id));
+    const patientsIdSet = new Set(result.patients.map(patient => patient.id));
+    const minShiftHour = 6;
+    const maxShiftHour = 20;
+  
+    result.appointments = getRandomAppointmentsArray(maxAmountAppointments, maxAmountPatientAttempt,  doctorsIdSet, patientsIdSet, minShiftHour, maxShiftHour);   
 
     // Return the response as JSON
     return NextResponse.json({
@@ -81,16 +96,16 @@ export async function GET(req, res) {
 
 /**
  * Generate appointments
- * @name generateAppointments
+ * @name getRandomAppointmentsArray
  * @param {number} maxAmountAppointments - max amount of appointments to generate
- * @param {number} amountPatientAttempt - max amount of appointment with one doctor
+ * @param {number} maxAmountPatientAttempt - max amount of appointment with one doctor
  * @param {Set} doctorsIdSet - a Set of doctors ids
  * @param {Set} patientsIdSet - a Set of patients ids
  * @param {number} minShiftHour - an hour start of shift
  * @param {number} maxShiftHour - an hour end of shift
  * @returns {Array} - an array of appointment
  */
-function generateAppointments(maxAmountAppointments, amountPatientAttempt,  doctorsIdSet, patientsIdSet, minShiftHour, maxShiftHour) {
+function getRandomAppointmentsArray(maxAmountAppointments, maxAmountPatientAttempt,  doctorsIdSet, patientsIdSet, minShiftHour, maxShiftHour) {
 
 }
 
