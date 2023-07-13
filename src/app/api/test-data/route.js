@@ -2,14 +2,18 @@ import { NextResponse } from "next/server";
 import { promises as fs } from 'fs';
 import path from 'path';
 
-const TEST_DATA_DIR = process.env.TEST_DATA_DIR;
+const maxTestPatients = 20;
+const maxTestDoctors = 5;
 
+const maxAmountAppointments = 40;
+const maxAmountPatientAttempt = 3;
+const minShiftHour = 6;
+const maxShiftHour = 20;
+
+const TEST_DATA_DIR = process.env.TEST_DATA_DIR;
 
 // Define the path to the test data file
 const testDataDirectory = path.join(process.cwd(), TEST_DATA_DIR, 'right-data.json');
-//const testDataDirectory = path.join(process.cwd(), 'test/data', 'right-data.json');
-const maxTestPatients = 20;
-const maxTestDoctors = 5;
 
 /******************************************************
  * Get a random integer number
@@ -63,12 +67,8 @@ export async function GET(req, res) {
     };
 
 
-    const maxAmountAppointments = 40;
-    const maxAmountPatientAttempt = 3;
     const doctorsIdSet = new Set(result.doctors.map(doctor => doctor.id));
     const patientsIdSet = new Set(result.patients.map(patient => patient.id));
-    const minShiftHour = 6;
-    const maxShiftHour = 20;
   
     result.appointments = getRandomAppointmentsArray(maxAmountAppointments, maxAmountPatientAttempt,  doctorsIdSet, patientsIdSet, minShiftHour, maxShiftHour);   
 
@@ -98,7 +98,6 @@ export async function GET(req, res) {
  * Generate appointments
  * @name getRandomAppointmentsArray
  * @param {number} maxAmountAppointments - max amount of appointments to generate
- * @param {number} maxAmountPatientAttempt - max amount of appointment with one doctor
  * @param {Set} doctorsIdSet - a Set of doctors ids
  * @param {Set} patientsIdSet - a Set of patients ids
  * @param {number} minShiftHour - an hour start of shift
@@ -106,7 +105,15 @@ export async function GET(req, res) {
  * @returns {Array} - an array of appointment
  */
 function getRandomAppointmentsArray(maxAmountAppointments, maxAmountPatientAttempt,  doctorsIdSet, patientsIdSet, minShiftHour, maxShiftHour) {
-
+  const result = [];
+  while (result.length < maxAmountAppointments) {
+    result.push({
+      patient: [...patientsIdSet].at(getRandomInt(patientsIdSet.size)),
+      doctor: [...doctorsIdSet].at(getRandomInt(doctorsIdSet.size)),
+      hour: getRandomInt(maxShiftHour - minShiftHour) + minShiftHour
+    });
+  }
+  return result
 }
 
 /*
