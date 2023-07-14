@@ -29,7 +29,7 @@ function getRandomInt(max) {
 
 
 function personToString(person) {
-  return `${person.id}, ${person.name} ${person.surname}, ${person.hours}, ${person.birthDate}`;
+  return `${person.id}, ${person.hours}, ${person.name} ${person.surname}, ${person.birthDate}`;
 }
 
 function appointmentToString(appointment) {
