@@ -26,6 +26,17 @@ function getRandomInt(max) {
   return Math.floor(Math.random() * max) ?? -1;
 }
 
+
+
+function personToString(person) {
+  return `${person.id}, ${person.name} ${person.surname}, ${person.hours}, ${person.birthDate}`;
+}
+
+function appointmentToString(appointment) {
+  return `${appointment.patient}, ${appointment.doctor}, ${appointment.hour}`;
+}
+
+
 /**
  * Get an array of random persons from the provided array
  * @name getRandomPersonArray
@@ -39,11 +50,17 @@ function getRandomPersonArray(persons, max) {
     personsRandomSet.add(getRandomInt(persons.length - 1));
   }
 
-  const result = [];
+  const result = {
+    personsIdSet: new Set(),
+    body: ""
+  };
+  const tArr = [];
   personsRandomSet.forEach(position => {
-    result.push(persons[position]);
+    result.personsIdSet.add(persons[position].id);
+    tArr.push(personToString(persons[position]));
   });
-
+  result.body = tArr.join('\n');
+  console.log(result);
   return result;
 }
 
@@ -61,16 +78,17 @@ export async function GET(req, res) {
     const patientsAndDoctors = JSON.parse(await fs.readFile(testDataDirectory, 'utf8'));
 
     // Get random patients and doctors
+    const patients = getRandomPersonArray(patientsAndDoctors.patients, maxTestPatients);
+    const doctors = getRandomPersonArray(patientsAndDoctors.doctors, maxTestDoctors);
     const result = {
-      patients: getRandomPersonArray(patientsAndDoctors.patients, maxTestPatients),
-      doctors: getRandomPersonArray(patientsAndDoctors.doctors, maxTestDoctors),
+      patients: patients.body,
+      doctors: doctors.body,
     };
 
+    const doctorsIdSet = patients.personsIdSet;
+    const patientsIdSet = doctors.personsIdSet;
 
-    const doctorsIdSet = new Set(result.doctors.map(doctor => doctor.id));
-    const patientsIdSet = new Set(result.patients.map(patient => patient.id));
-  
-    result.appointments = getRandomAppointmentsArray(maxAmountAppointments, maxAmountPatientAttempt,  doctorsIdSet, patientsIdSet, minShiftHour, maxShiftHour);   
+    result.appointments = getRandomAppointmentsArray(maxAmountAppointments, maxAmountPatientAttempt,  doctorsIdSet, patientsIdSet, minShiftHour, maxShiftHour).join('\n');   
 
     // Return the response as JSON
     return NextResponse.json({
@@ -107,11 +125,11 @@ export async function GET(req, res) {
 function getRandomAppointmentsArray(maxAmountAppointments, maxAmountPatientAttempt,  doctorsIdSet, patientsIdSet, minShiftHour, maxShiftHour) {
   const result = [];
   while (result.length < maxAmountAppointments) {
-    result.push({
+    result.push(appointmentToString({
       patient: [...patientsIdSet].at(getRandomInt(patientsIdSet.size)),
       doctor: [...doctorsIdSet].at(getRandomInt(doctorsIdSet.size)),
       hour: getRandomInt(maxShiftHour - minShiftHour) + minShiftHour
-    });
+    }));
   }
   return result
 }
