@@ -56,10 +56,11 @@ export default function AddBlock() {
   function handleSendData() {
     //dbOperations.addCollection();
     console.log(registrationData);
-    setRegistrationDataForModal(registrationData);
+    if(Object.keys(registrationDataForModal).length === 0) {
+      setRegistrationDataForModal(registrationData);
+    }
     setSaveModalShow(true);
     document.querySelector("#frmAddRegistrationData").reset();
-    //setRegistrationData({});
   }
 
   function handleClearDB() {
@@ -69,6 +70,7 @@ export default function AddBlock() {
   function saveModalClose() {
     setSaveModalShow(false);
     setRegistrationDataForModal({});
+    setRegistrationData({});
   }
 
   return (
