@@ -78,18 +78,21 @@ export default function AddBlock() {
           <div className="row">
             <div className="col">
               <Patients
+                patients={registrationDataForModal.patients}
                 dataTest="patients"
                 onPatients={handleChangePatients}
               ></Patients>
             </div>
             <div className="col">
               <Doctors
+                doctors={registrationDataForModal.doctors}
                 dataTest="doctors"
                 onDoctors={handleChangeDoctors}
               ></Doctors>
             </div>
             <div className="col">
-              <Appointments appointments={{...registrationDataForModal.appointments}}
+              <Appointments 
+                appointments={registrationDataForModal.appointments}
                 dataTest="appointments"
                 onAppointments={handleChangeAppointments}
               ></Appointments>
