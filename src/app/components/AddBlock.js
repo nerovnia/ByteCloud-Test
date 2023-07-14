@@ -127,19 +127,9 @@ export default function AddBlock() {
           </button>
         </div>
       </form>
-      {
-        /*
-      <SaveModal
-      show={saveModalShow}
-      reportdata={validateRegisterRecords(registrationDataForModal)}
-      onHide={() => saveModalClose()}
-    />
-      */
-
-      }
       <SaveModal
         show={saveModalShow}
-        reportdata={validateRegisterRecords(registrationData)}
+        reportdata={validateRegisterRecords(registrationDataForModal)}
         onHide={() => saveModalClose()}
       />
     </>
