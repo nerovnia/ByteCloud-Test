@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/utils/dbConnect";
+import { Patient, Doctor } from "@/models/Person";
 import Appointment from "@/models/Appointment";
 
 
@@ -31,20 +32,19 @@ export async function GET(req, res) {
 }
 
 async function insertArrToCollection(model, arr) {
-  await model.collection.insertMany()
+  await model.collection.insertMany(arr)
   .then((result) => {
     console.log(result);
-  });/*
+  })
   .catch((err) => {
     console.log(err);
-  });*/
+  });
 }
 
 
 export async function POST(req, res) {
   try {
-    await dbConnect();
-    
+    const connection = await dbConnect();
     const reestrDocuments = JSON.parse(await readStreamJSON(req.body));
     const patients = reestrDocuments.patients;
     const doctors = reestrDocuments.doctors;
@@ -53,15 +53,7 @@ export async function POST(req, res) {
     await insertArrToCollection(Patient, patients);
     await insertArrToCollection(Doctor, doctors);
     await insertArrToCollection(Appointment, appointments);
-/*
-    await Appointment.collection.insertMany()
-    .then((result) => {
-      console.log(result);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  */  
+    
     return NextResponse.json(
       {
         body: {
@@ -84,8 +76,12 @@ export async function POST(req, res) {
 
 export async function DELETE(req, res) {
   try {
-    await dbConnect();
-    let result = await Appointment.collection.drop();
+    const connection = await dbConnect();
+    const result = {};
+    result.patients = await Patient.count({});
+    result.doctors = await Doctor.count({});
+    result.appointments = await Appointment.count({});
+    Object.keys(connection.connections[0].collections).forEach(collectionName => connection.connections[0].collection(collectionName).drop());
     return NextResponse.json(
         {
           body: {

@@ -4,74 +4,94 @@ import Patients from "./input/Patients";
 import { useState, useEffect } from "react";
 import { validateRegisterRecords } from "../service/validators";
 import SaveModal from "./report/SaveModal";
+import ClearDBModal from "./report/ClearDBModal";
 import Fetch from "@/app/useFetch"
 
-import { InferGetServerSidePropsType, GetServerSideProps } from "next";
-//import { addCollection } from "@/utils/dbOperations";
-
 export default function AddBlock() {
-  const [registrationData, setRegistrationData] = useState({});
-  const [registrationDataForModal, setRegistrationDataForModal] = useState({});
-  const [saveModalShow, setSaveModalShow] = useState(false);
+  // source data
+  const [patients, setPatients] = useState("");
+  const [doctors, setDoctors] = useState("");
+  const [appointments, setAppointments] = useState("");
 
-  // ----------------------------- Delete in production
-  useEffect(() => {}, [registrationData]);
-  // -----------------------------
+  // after validations
+  const [verifiedData, setVerifiedData] = useState({});
+  const [clearDBData, setClearDBData] = useState({});
+
+  // state of modal dialogues
+  const [saveModalShow, setSaveModalShow] = useState(false);
+  const [clearDBModalShow, setClearDBModalShow] = useState(false);
 
   function handleAutofill() {
     const { get } = Fetch("/api/");
     get("test-data").then((testData) => {
-      //console.log(testData.body.data);
-      setRegistrationDataForModal(testData.body.data);
+      setPatients(testData.body.data.patients);
+      setDoctors(testData.body.data.doctors);
+      setAppointments(testData.body.data.appointments);
     });
   }
 
   function handleChangePatients(event) {
-    const { doctors, appointments } = registrationData;
-    setRegistrationData({
-      doctors,
-      appointments,
-      patients: event.target.value,
-    });
+    setPatients(event.target.value);
   }
 
   function handleChangeDoctors(event) {
-    const { patients, appointments } = registrationData;
-    setRegistrationData({
-      doctors: event.target.value,
-      appointments,
-      patients,
-    });
+    setDoctors(event.target.value);
   }
 
   function handleChangeAppointments(event) {
-    const { patients, doctors } = registrationData;
-    setRegistrationData({
-      doctors,
-      appointments: event.target.value,
-      patients,
-    });
+    setAppointments(event.target.value);
   }
 
   function handleSendData() {
-    //dbOperations.addCollection();
-    console.log(registrationData);
-    if(Object.keys(registrationDataForModal).length === 0) {
-      setRegistrationDataForModal(registrationData);
+    // Prepare data for sending
+    if((patients !== "") || (doctors !== "") || (appointments !== "")) {
+      const validData = validateRegisterRecords({
+        patients: patients,
+        doctors: doctors,
+        appointments: appointments,
+      });
+      setVerifiedData(validData);
+      
+      // Send prepared data to server for save
+      const dataForSave = {
+        patients: validData.patients.successful.map(patient => patient.obj),
+        doctors: validData.doctors.successful.map(doctor => doctor.obj),
+        appointments: validData.appointments.successful.map(appointment => appointment.obj),
+      };
+      const { post } = Fetch("/api/");
+      post("collections", dataForSave).then((status) => {
+        console.log(status);
+      });
     }
+
+    // Show save statistic modal window and clear form
     setSaveModalShow(true);
     document.querySelector("#frmAddRegistrationData").reset();
   }
 
   function handleClearDB() {
     console.log("Clear DB");
-  }
+    const { del } = Fetch("/api/");
+    del("collections").then((status) => {
+      setClearDBData(status.body.data);
+      //console.log(status);
+      setClearDBModalShow(true);
+
+    });
+}
 
   function saveModalClose() {
     setSaveModalShow(false);
-    setRegistrationDataForModal({});
-    setRegistrationData({});
+    setVerifiedData({});
+    setPatients("");
+    setDoctors("");
+    setAppointments("");
   }
+
+  function clearDBModalClose() {
+    setClearDBModalShow(false);
+  }
+  
 
   return (
     <>
@@ -80,22 +100,22 @@ export default function AddBlock() {
           <div className="row">
             <div className="col">
               <Patients
-                patients={registrationDataForModal.patients}
-                dataTest="patients"
+                patients={verifiedData.patients}
+                dataTest={patients}
                 onPatients={handleChangePatients}
               ></Patients>
             </div>
             <div className="col">
               <Doctors
-                doctors={registrationDataForModal.doctors}
-                dataTest="doctors"
+                doctors={verifiedData.doctors}
+                dataTest={doctors}
                 onDoctors={handleChangeDoctors}
               ></Doctors>
             </div>
             <div className="col">
               <Appointments 
-                appointments={registrationDataForModal.appointments}
-                dataTest="appointments"
+                appointments={verifiedData.appointments}
+                dataTest={appointments}
                 onAppointments={handleChangeAppointments}
               ></Appointments>
             </div>
@@ -131,8 +151,13 @@ export default function AddBlock() {
       </form>
       <SaveModal
         show={saveModalShow}
-        reportdata={validateRegisterRecords(registrationDataForModal)}
+        reportdata={verifiedData}
         onHide={() => saveModalClose()}
+      />
+      <ClearDBModal
+        show={clearDBModalShow}
+        reportdata={clearDBData}
+        onHide={() => clearDBModalClose()}
       />
     </>
   );
