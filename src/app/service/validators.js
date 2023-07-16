@@ -49,7 +49,7 @@ function validatePerson(successPersons, person) {
     return "duplicate";
   }
 
-  if((Number.parseInt(personDataArr[0]) > 0) && (isRightAppHoursString(personDataArr[1]))) {
+  if((isRightNumber(personDataArr[0])) && (Number.parseInt(personDataArr[0]) > 0) && (isRightAppHoursString(personDataArr[1]))) {
     if ((personDataArr.length > 2) && (!isRightPersonName(personDataArr[2]))) {
       if ((personDataArr.length === 3) && (isRightDateString(personDataArr[2]))) {
         return "success";
@@ -75,11 +75,11 @@ function validateAppointment(successAppointments, appointment) {
     return "duplicate";
   }
 
-  if((Number.parseInt(appointmentDataArr[0]) > 0) && (Number.parseInt(appointmentDataArr[1]) > 0)) {
+  if(((isRightNumber(appointmentDataArr[0])) && (Number.parseInt(appointmentDataArr[0]) > 0)) && ((isRightNumber(appointmentDataArr[1])) && (Number.parseInt(appointmentDataArr[1]) > 0))) {
     if (appointmentDataArr.length === 2) {
       return "success";
     }
-    if ((appointmentDataArr.length === 3) && ((Number.parseInt(appointmentDataArr[2]) > 0) && ((!Number.parseInt(appointmentDataArr[2]) < 24)))) {
+    if ((appointmentDataArr.length === 3) && (((isRightNumber(appointmentDataArr[2])) && (Number.parseInt(appointmentDataArr[2]) > 0)) && ((!Number.parseInt(appointmentDataArr[2]) < 24)))) {
         return "success";
     }
     return "wrong";
@@ -119,6 +119,10 @@ function parseToAppointment(appointmentStr) {
   return result;
 }
 
+// Check if data is a positive number and more then 0
+function isRightNumber(str) {
+  return /^\s*[1-9][0-9]*\s*$/.test(str);
+}
 
 function isRightPersonName(str) {
   return /^\s*([A-Za-z])+\s*([A-Za-z])*\s*$/.test(str);
